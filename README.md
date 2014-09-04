@@ -17,7 +17,12 @@ var fs = require("fs")
 var entrypointFileStream = fs.createReadStream("myInstaller.js")
 var packageStream = makeInstaller({
     nodeVersions: ['0.10.25'], // which node.js versions can be installed
-	files: [{'index.js':entrypointFileStream}, 'package.json', 'node_modules/incremental-installer', {'imaginaryFile.txt':"pretend file contents"}]
+	files: [
+    	{'index.js':entrypointFileStream},
+        'package.json',
+        'node_modules/incremental-installer',
+        {'imaginaryFile.txt':"pretend file contents"}
+    ]
 })
 
 var outputStream = packageStream.pipe(fs.createWriteStream("myInstaller.sh")) // create the installer shell script
@@ -42,8 +47,8 @@ npm install installer-maker
 2. **Run the script builder to generate the shell script**
 3. **Run the shell script on the target machine** - The resulting shell script should be copied to the machine on which you want to run the installation. Run the shell script wherever is appropriate with whatever commandline arguments are appropriate.
   * The script can be copied via scp or even simply copy-pasted into a terminal editor and saved.
-  * currently this has to be a machine that can execute bash scripts, but does **not** require the `uudecode` command to already be installed (it will be automatically installed)
-  * The script only needs to be run with `sudo` if you expect it to install node.js, or `uudecode`. Otherwise you shouldn't have to use `sudo` unless your installation script itself requires it.
+  * currently this has to be a machine that can execute bash scripts
+  * The script only needs to be run with `sudo` if you expect it to install node.js. Otherwise you shouldn't have to use `sudo` unless your installation script itself requires it.
 
 **Note**: The node install script runs in a temporary directory that is be deleted after the install process. If you want to access the directory that the shell script was run from, it is the parent directory of the directory in which the node script is run in (ie process.directory+"/..").
 
@@ -74,7 +79,9 @@ var makeInstaller = require('installer-maker')
 Dependencies
 ======
 
-The following console commands are required to run the installer:
+Node version 0.10.26 or higher is required (a bug was found in 0.10.25)
+
+The following console commands are required to run the generated shell script:
 * `cp`
 * `rm`
 * `tar`
@@ -98,6 +105,7 @@ Todo
 * use browserify to package together the main script, so the user doesn't have to manually specify which dependencies to package up
 * Make this able to output .bat files for windows
 * Figure out a way to make the current working directory the directory you run the shell script from without making the entrypoint scripts working directory unintuitive
+* Figure out if its possible to avoid requiring sudo to install node (maybe this: http://tnovelli.net/blog/blog.2011-08-27.node-npm-user-install.html)
 
 How to Contribute!
 ============
@@ -127,6 +135,7 @@ How to submit pull requests:
 Change Log
 =========
 
+* 1.0.1 - minor improvements, and adding "engines" to package.json
 * 1.0.0 - Breaking change
   * changed the interface so that it no longer uses the currently executing file as the entrypoint (instead you have to specify the entrypoint)
   * added support for input streams and return an output stream (instead of writing to the file system)

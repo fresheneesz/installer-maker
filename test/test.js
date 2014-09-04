@@ -7,6 +7,8 @@ var Unit = require("deadunit")
 Unit.test(function() {
     var makeInstaller = require('../makeInstaller')
 
+    var nodeVersions = ['0.10.29']
+
     this.test('success', function(t) {
         this.count(3)
 
@@ -14,7 +16,7 @@ Unit.test(function() {
         var outputName = 'mytestinstaller.sh'
 
         var packageStream = makeInstaller({
-            nodeVersions: ['0.10.25'],
+            nodeVersions: nodeVersions,
             files: [
                 {name:  entrypoint,
                  body:  'var fs = require("fs")\n'+
@@ -58,6 +60,7 @@ Unit.test(function() {
             t.test('script runs correctly', function(t) {
                 this.count(1)
 
+                //fs.chmodSync(outputName, '776')
                 var c = child.spawn("bash", [outputName, 'moo'])
                 var output = ''
                 c.stdin.on('data', function(data) {
@@ -67,9 +70,11 @@ Unit.test(function() {
                     output += data
                 })
                 c.on('close', function() {
+
+                    //Removed the following from the match regexp: "Working directory contains the shell script: true"+ // while ideal, this would either require that I unpack things without a temp folder (which has a higher likelyhood over overwritings stuff and is harder to clean up), or the current working directory would be one directory above the entrypoint script, which would likely be confusing to those using this
                     t.ok(output.match(new RegExp(
                         "The command-line arguments are: node,.*"+entrypoint+",moo\n"+
-                        //"Working directory contains the shell script: true"+ // while ideal, this would either require that I unpack things without a temp folder (which has a higher likelyhood over overwritings stuff and is harder to clean up), or the current working directory would be one directory above the entrypoint script, which would likely be confusing to those using this
+
                         "Working directory is: temporaryPackageFolder"+
                         "  I am zee test file\n"+
                         "  yyyyyyyy\n"+
@@ -94,7 +99,7 @@ Unit.test(function() {
         var tempDir = 'testTempDir'
 
         var packageStream = makeInstaller({
-            nodeVersions: ['0.10.25'],
+            nodeVersions: nodeVersions,
             tempDir: tempDir,
             files: [{name:  'index.js', body:  'var path = require("path")\n'+'console.log(path.basename(__dirname))'}]
         })
@@ -126,7 +131,7 @@ Unit.test(function() {
             this.count(1)
 
             var packageStream = makeInstaller({
-                nodeVersions: ['0.10.25'],
+                nodeVersions: nodeVersions,
                 files: [
                     "nonexistantEntity",
                 ]
@@ -144,7 +149,7 @@ Unit.test(function() {
             this.count(1)
 
             var packageStream = makeInstaller({
-                nodeVersions: ['0.10.25'],
+                nodeVersions: nodeVersions,
                 files: [
                     {name: 'stringFile', body: {toString: 324}},
                 ]

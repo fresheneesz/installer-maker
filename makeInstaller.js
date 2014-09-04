@@ -62,8 +62,6 @@ module.exports = function(options) {
 
         curFuture.then(function() {
             pack.finalize()
-            //fs.writeFileSync(filepath, packageContents)
-            //fs.chmodSync(filepath, '776')
         }).catch(function(e) {
             resultStream.emit('error',e)
         }).done()
@@ -191,12 +189,12 @@ function createShellScript(highestNodeVersion, tempDirectory, entrypointFile, en
     var shellScript = '#!/bin/bash\n'
         +'set -e\n'
         +'\n'
-        +'type wget >/dev/null 2>&1 || {\n'
-        +'  yum install -y wget # required for the node.js installation\n'
-        +'}\n'
-        +'\n'
         +'# node.js\n'
         +'type node >/dev/null 2>&1 || { # check if command "node" exists\n'
+        +'  type wget >/dev/null 2>&1 || {\n'
+        +'    yum install -y wget # required for the node.js installation\n'
+        +'  }\n'
+        +'  \n'
         +'  currentDir=$(pwd) # save cwd\n'
         +'  cd /usr/local/src/\n'
         +'  wget http://nodejs.org/dist/v'+highestNodeVersion+'/node-v'+highestNodeVersion+'.tar.gz\n'
