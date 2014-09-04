@@ -16,7 +16,7 @@ var fs = require("fs")
 
 var entrypointFileStream = fs.createReadStream("myInstaller.js")
 var packageStream = makeInstaller({
-    nodeVersions: ['0.10.25'], // which node.js versions can be installed
+    nodeVersions: ['0.10.29'], // which node.js versions can be installed
 	files: [
     	{'index.js':entrypointFileStream},
         'package.json',
