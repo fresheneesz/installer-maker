@@ -4,11 +4,12 @@ var path = require('path')
 var zlib = require('zlib')
 var Stream = require("stream")
 
-var CombinedStream = require('combined-stream')
 var tar = require('tar-stream')
 var base64 = require("base64-stream")
 var Future = require('async-future')
 Future.debug = true
+
+var streamUtils = require('./streamUtils')
 
 module.exports = function(options) {
     try {
@@ -125,9 +126,12 @@ function processFileEntries(files, handleError) {
                         if(size === undefined) {
                             throw new Error("Entry "+n+" in the 'files' list needs a 'size' because it is a stream")
                         }
+                    } else if(contents instanceof Buffer) {
+                        var stream = streamUtils.stringToStream(contents)
+                        var size = contents.length
                     } else if(contents.toString !== undefined) {
                         var contentsString = contents.toString()
-                        var stream = stringToStream(contentsString)
+                        var stream = streamUtils.stringToStream(contentsString)
                         var size = contentsString.length
                     } else {
                         throw new Error("The 'body' of entry "+n+" in the 'files' list is neither a Stream nor does it have a toString method")
@@ -234,38 +238,9 @@ function createShellScript(highestNodeVersion, tempDirectory, entrypointFile, en
         +'\n'
         +'exit 0\n'
 
-        return concatStreams(stringToStream(shellScript), encodedDataStream)
+        return streamUtils.concatStreams(streamUtils.stringToStream(shellScript), encodedDataStream)
 }
 
-function concatStreams(a,b) {
-    var combinedStream = CombinedStream.create()
-    combinedStream.append(a)
-    combinedStream.append(b)
-
-    return combinedStream
-}
-function stringToStream(s) {
-    var a = new Stream.PassThrough()
-    a.write(s)
-    a.end()
-    return a
-}
-function streamToString(s) {
-    var f = new Future
-
-    var theString = ''
-    s.on('data', function(data) {
-        theString+= data
-    })
-    s.on('end', function() {
-        f.return(theString)
-    })
-    s.on('error', function(e) {
-        f.throw(e)
-    })
-
-    return f
-}
 
 function findHighestNodeVersion(versionList) {
     // find highest node version

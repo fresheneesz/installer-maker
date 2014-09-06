@@ -69,7 +69,7 @@ var makeInstaller = require('installer-maker')
    * A path to a file or folder on the file system. Absolute paths and paths that are in a parent directory of the entrypoint file will be placed at the root of the temporary directory inside the package (so if the entrypoint is also at the root, it could access those files via` __dirname+'/<filename>'` or `require('.<filename>')`). If you want behavior that unpacks files into parent directories or absolute paths, instead pass an object with a `location` as a property.
    * An object with the following properties:
      * `name` - The filename that will be written into (and subsequently unpacked from) the tar file
-     * `body` - (*Optional*) The file body, which can either be [a Readable stream object](http://nodejs.org/api/stream.html) or an object with a toString method
+     * `body` - (*Optional*) The file body, which can either be [a Readable stream object](http://nodejs.org/api/stream.html), a `Buffer`, or an object with a `toString` method
      * `location` - (*Optional*) A path that the file or folder contents should come from. For directories, if this is blank, an empty diretory will be created.
      * `type` - (*Optional*) Either `'file'`, `'directory'`, or `undefined`. If left `undefined`, the type will be found by using the location if available, or will default to "file", if there is no location given.
  * `tempDir` - (*Optional*) The temporary directory that will be created in the current working directory when the shell script is run. The default is `'temporaryPackageFolder'`.
@@ -135,6 +135,7 @@ How to submit pull requests:
 Change Log
 =========
 
+* 1.0.3 - support buffers
 * 1.0.2 - documentation corrections
 * 1.0.1 - minor improvements, and adding "engines" to package.json
 * 1.0.0 - Breaking change

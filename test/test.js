@@ -4,6 +4,8 @@ var child = require('child_process')
 
 var Unit = require("deadunit")
 
+var streamUtils = require('../streamUtils')
+
 Unit.test(function() {
     var makeInstaller = require('../makeInstaller')
 
@@ -120,6 +122,47 @@ Unit.test(function() {
                 })
                 c.on('close', function() {
                     t.eq(output, tempDir)
+                })
+            })
+        })
+    })
+
+    this.test('buffers', function(t) {
+        this.count(3)
+
+        var outputName = 'mytestinstaller3.sh'
+        var bufString = "漢字"
+        var buf = new Buffer("漢字")
+        var bufFileLocation = __dirname+'/buf'      // the location to create the file
+
+        t.ok(!fs.existsSync(bufFileLocation))
+
+        var packageStream = makeInstaller({
+            nodeVersions: nodeVersions,
+            files: [
+                {name:  'index.js', body:  'var fs = require("fs")\n'+'fs.writeFileSync(__dirname+"/../buf", fs.readFileSync(__dirname+"/buf"))'},
+                {name:  'buf', body:  buf}
+            ]
+        })
+
+        t.ok(buf.length !== buf.toString().length) // this test is only valid if they aren't the same (cause that was the problem)
+
+        packageStream.pipe(fs.createWriteStream(outputName)).on('finish', function() {
+            t.test('script contains correct contents', function(t) {
+                this.count(1)
+
+                var c = child.spawn("bash", [outputName])
+                var output = ''
+                c.stdin.on('data', function(data) {
+                    output += data
+                })
+                c.stderr.on('data', function(data) {
+                    output += data
+                })
+                c.on('close', function() {
+                    var newBufContents = fs.readFileSync(bufFileLocation)
+                    t.eq(newBufContents.toString(), bufString)
+                    fs.unlinkSync(bufFileLocation)
                 })
             })
         })
