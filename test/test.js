@@ -3,14 +3,14 @@ var path = require('path')
 var child = require('child_process')
 
 var Unit = require("deadunit")
-
-var streamUtils = require('../streamUtils')
+var Future = require("async-future")
 
 Unit.test(function() {
     var makeInstaller = require('../makeInstaller')
 
     var nodeVersions = ['0.10.29']
 
+    var f1 = new Future, f2 = new Future
     this.test('success', function(t) {
         this.count(3)
 
@@ -60,34 +60,25 @@ Unit.test(function() {
             t.ok(fs.existsSync(outputName))
 
             t.test('script runs correctly', function(t) {
-                this.count(1)
+                this.count(11)
 
                 //fs.chmodSync(outputName, '776')
-                var c = child.spawn("bash", [outputName, 'moo'])
-                var output = ''
-                c.stdin.on('data', function(data) {
-                    output += data
-                })
-                c.stderr.on('data', function(data) {
-                    output += data
-                })
-                c.on('close', function() {
-
+                run('bash', [outputName, 'moo'], function(output) {
                     //Removed the following from the match regexp: "Working directory contains the shell script: true"+ // while ideal, this would either require that I unpack things without a temp folder (which has a higher likelyhood over overwritings stuff and is harder to clean up), or the current working directory would be one directory above the entrypoint script, which would likely be confusing to those using this
-                    t.ok(output.match(new RegExp(
-                        "The command-line arguments are: node,.*"+entrypoint+",moo\n"+
+                    var lines = output.split('\n')
+                    t.ok(lines[0].match(new RegExp("The command-line arguments are: .*node.*,.*index\\.js,moo")) !== null, lines[0])
+                    t.eq(lines[1], "Working directory is: temporaryPackageFolder")
+                    t.eq(lines[2], "  I am zee test file")
+                    t.eq(lines[3], "  yyyyyyyy")
+                    t.eq(lines[4], "  the test3 file man")
+                    t.eq(lines[5], "  striiiiing")
+                    t.eq(lines[6], "  another test file")
+                    t.eq(lines[7], "  true")
+                    t.eq(lines[8], "  ANOTHER ONE")
+                    t.eq(lines[9], "  But I am test file too")
+                    t.eq(lines[10].trim(),"The MIT License (MIT)") // trim so that to get rid of differences in end of output for windows and linux
 
-                        "Working directory is: temporaryPackageFolder"+
-                        "  I am zee test file\n"+
-                        "  yyyyyyyy\n"+
-                        "  the test3 file man\n"+
-                        "  striiiiing\n"+
-                        "  another test file\n"+
-                        "  true\n"+
-                        "  ANOTHER ONE\n"+
-                        "  But I am test file too\n"+
-                        "  The MIT License (MIT)\n"
-                    )) !== null, output)
+                    f1.return()
                 })
             })
         })
@@ -112,16 +103,10 @@ Unit.test(function() {
             t.test('script runs correctly', function(t) {
                 this.count(1)
 
-                var c = child.spawn("bash", [outputName, 'moo'])
-                var output = ''
-                c.stdin.on('data', function(data) {
-                    output += data
-                })
-                c.stderr.on('data', function(data) {
-                    output += data
-                })
-                c.on('close', function() {
-                    t.eq(output, tempDir)
+                run('bash', [outputName], function(output) {
+                    t.eq(output.trim(), tempDir)
+
+                    f2.return()
                 })
             })
         })
@@ -151,19 +136,13 @@ Unit.test(function() {
             t.test('script contains correct contents', function(t) {
                 this.count(1)
 
-                var c = child.spawn("bash", [outputName])
-                var output = ''
-                c.stdin.on('data', function(data) {
-                    output += data
-                })
-                c.stderr.on('data', function(data) {
-                    output += data
-                })
-                c.on('close', function() {
-                    var newBufContents = fs.readFileSync(bufFileLocation)
-                    t.eq(newBufContents.toString(), bufString)
-                    fs.unlinkSync(bufFileLocation)
-                })
+                Future.all([f1,f1]).then(function() {     // this is in a future beacuse the running of the script somehow disrupted the other tests
+                    run('bash', [outputName], function(output) {
+                        var newBufContents = fs.readFileSync(bufFileLocation)
+                        t.eq(newBufContents.toString(), bufString)
+                        fs.unlinkSync(bufFileLocation)
+                    })
+                }).done()
             })
         })
     })
@@ -221,7 +200,23 @@ Unit.test(function() {
     })
 }).writeConsole()
 
-
 // test
     // test the tempDir option
     // make sure the current working directory is right (the directory the script is run from)
+
+
+function run(command, args, cb) {
+    var c = child.spawn(command, args, {
+        cwd: process.cwd()
+    })
+    var output = ''
+    c.stdout.on('data', function(data) {
+        output += data
+    })
+    c.stderr.on('data', function(data) {
+        output += data
+    })
+    c.on('close', function() {
+        cb(output)
+    })
+}

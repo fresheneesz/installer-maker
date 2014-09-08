@@ -135,6 +135,7 @@ How to submit pull requests:
 Change Log
 =========
 
+* 1.0.4 - fixing bugs in linux and unit tests
 * 1.0.3 - support buffers
 * 1.0.2 - documentation corrections
 * 1.0.1 - minor improvements, and adding "engines" to package.json
