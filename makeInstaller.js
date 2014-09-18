@@ -1,4 +1,3 @@
-var fs = require("fs")
 var domain = require('domain')
 var path = require('path')
 var zlib = require('zlib')
@@ -11,7 +10,7 @@ Future.debug = true
 
 var streamUtils = require('./streamUtils')
 
-module.exports = function(options) {
+var exports = module.exports = function(options) {
     try {
         if(options.tempDir === undefined) options.tempDir = 'temporaryPackageFolder'
 
@@ -78,6 +77,8 @@ module.exports = function(options) {
     }
 }
 
+exports.fs = require("fs")
+
 // normalizes the file entries and does some validation
 function processFileEntries(files, handleError) {
     var entities = []
@@ -85,7 +86,7 @@ function processFileEntries(files, handleError) {
         var entry = files[n]
         if(isString(entry)) { // file path
             var name = entry
-            var info = fs.statSync(name)
+            var info = exports.fs.statSync(name)
             if(info.isDirectory()) {
                 var type = 'directory'
                 entities = entities.concat(getAllEntitiesInDirectory(name, name, readStream))
@@ -104,7 +105,7 @@ function processFileEntries(files, handleError) {
 
             if(entry.type === undefined) {
                 if(entry.location !== undefined) {
-                    var info = fs.statSync(entry.location)
+                    var info = exports.fs.statSync(entry.location)
                     if(info.isDirectory()) {
                         entry.type = 'directory'
                     } else {
@@ -160,7 +161,7 @@ function processFileEntries(files, handleError) {
     return entities
 
     function readStream(name, number) {
-        var stream = fs.createReadStream(name)
+        var stream = exports.fs.createReadStream(name)
         stream.on('error', function(e) {
             handleError(new Error("Error "+number+" in ReadStream for '"+name+"': "+e))
         })
@@ -170,9 +171,9 @@ function processFileEntries(files, handleError) {
 
 function getAllEntitiesInDirectory(location, basePath, readStream) {
     var entities = []
-    fs.readdirSync(location).map(function(name) {
+    exports.fs.readdirSync(location).map(function(name) {
         var entityPath = location+'/'+name
-        var info = fs.statSync(entityPath)
+        var info = exports.fs.statSync(entityPath)
         if(info.isDirectory()) {
             var type = 'directory'
             entities = entities.concat(getAllEntitiesInDirectory(entityPath, basePath+'/'+name, readStream))
