@@ -200,6 +200,8 @@ function createShellScript(highestNodeVersion, tempDirectory, entrypointFile, en
         +'    yum install -y wget # required for the node.js installation\n'
         +'  }\n'
         +'  \n'
+        +"  yum groupinstall -y 'Development Tools'\n"
+
         +'  currentDir=$(pwd) # save cwd\n'
         +'  cd /usr/local/src/\n'
         +'  wget http://nodejs.org/dist/v'+highestNodeVersion+'/node-v'+highestNodeVersion+'.tar.gz\n'

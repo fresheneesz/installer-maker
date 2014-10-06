@@ -60,6 +60,8 @@ npm install installer-maker
 var makeInstaller = require('installer-maker')
 ```
 
+`makeInstaller.fs = require("graceful-fs")` - set an object that will be used in place of fs inside installer-maker
+
 `var packageStream = makeInstaller(options)` - creates an installer shell script
 
 * `installerJavascriptFile` - A handle to the javascript to Can either be an object with a `toString` method, or it can be a `Stream`.
@@ -135,6 +137,8 @@ How to submit pull requests:
 Change Log
 =========
 
+* 1.1.1 - adding installation of development tools necessary for node.js compilation if they aren't already installed
+* 1.1.0 - allow passing in an object to be used in place of `fs`
 * 1.0.4 - fixing bugs in linux and unit tests
 * 1.0.3 - support buffers
 * 1.0.2 - documentation corrections

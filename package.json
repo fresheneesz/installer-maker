@@ -1,5 +1,5 @@
 {"name":"installer-maker",
- "version":"1.1.0",
+ "version":"1.1.1",
  "main":"makeInstaller.js",
  "description": "A module for node.js programs that packages multiple files into a single script (shell script) that will run a node.js program on a machine (currently linux only), whether or not it has node.js already installed (it will install node.js if it isn't already).",
  "keywords": ["installer", "install", "package", "dependencies", "script", "shell script", "builder", "build"],
