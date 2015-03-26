@@ -233,10 +233,11 @@ function createShellScript(highestNodeVersion, tempDirectory, entrypointFile, en
         +'  rm -Rf "'+tempDirectory+'"\n'
         +'fi\n'
         +'untar_payload\n'
+        +'originalWorkingDirectory=`pwd`\n'
         +'cd '+tempDirectory+'\n'
-        +'node '+entrypointFile+' "$@"' // forward parameters into the preinstall script
-        +' || : \n' // ignores errors on this line, since errors are already reported via node.js (":" means no-op)
-        +'cd ..\n'
+        +'node '+entrypointFile+' "$@"\n' // forward parameters into the preinstall script
+        //+' || : \n' // ignores errors on this line, since errors are already reported via node.js (":" means true/no-op)
+        +'cd $originalWorkingDirectory\n'
         +'rm -Rf '+tempDirectory+' # clean up\n'
         +'\n'
         +'exit 0\n'

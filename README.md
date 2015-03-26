@@ -137,6 +137,7 @@ How to submit pull requests:
 Change Log
 =========
 
+* 1.1.2 - fixing minor bug where temporary folder was not deleted after running the package
 * 1.1.1 - adding installation of development tools necessary for node.js compilation if they aren't already installed
 * 1.1.0 - allow passing in an object to be used in place of `fs`
 * 1.0.4 - fixing bugs in linux and unit tests

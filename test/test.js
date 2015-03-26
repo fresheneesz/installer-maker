@@ -60,7 +60,7 @@ Unit.test(function() {
             t.ok(fs.existsSync(outputName))
 
             t.test('script runs correctly', function(t) {
-                this.count(11)
+                this.count(12)
 
                 //fs.chmodSync(outputName, '776')
                 run('bash', [outputName, 'moo'], function(output) {
@@ -77,6 +77,8 @@ Unit.test(function() {
                     t.eq(lines[8], "  ANOTHER ONE")
                     t.eq(lines[9], "  But I am test file too")
                     t.eq(lines[10].trim(),"The MIT License (MIT)") // trim so that to get rid of differences in end of output for windows and linux
+
+                    t.eq(fs.existsSync(__dirname+'/temporaryPackageFolder'), false)
 
                     f1.return()
                 })
@@ -198,7 +200,7 @@ Unit.test(function() {
             })
         })
     })
-}).writeConsole()
+}).writeConsole(1000)
 
 // test
     // test the tempDir option
